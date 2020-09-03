@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>客服聊天</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<!-- 所有的 css & js 资源 -->
+		<link rel="stylesheet" href="https://unpkg.com/element-ui@2.13.0/lib/theme-chalk/index.css">
+		<link rel="stylesheet" href="../../static/sa.css"> 
+		<script src="https://unpkg.com/vue@2.6.10/dist/vue.min.js"></script>
+		<script src="https://unpkg.com/element-ui@2.13.0/lib/index.js"></script>
+		<script src="https://unpkg.com/jquery@3.4.1/dist/jquery.min.js"></script>
+		<script src="https://www.layuicdn.com/layer-v3.1.1/layer.js"></script>
+		<script src="https://unpkg.com/wangeditor@3.1.1/release/wangEditor.min.js"></script>
+		<script src="../../static/sa.js"></script>
+		<style>
+			#container{
+				height: 97vh;
+			}
+			.aside, #im_text{
+				height: 97vh;
+				overflow:auto
+			}
+			/* 用户聊天列表 */
+			.im_u{
+				margin-top: 20px;
+				margin-left: 20px;
+				
+				height: 60px;
+				user-select: none;
+			}
+			.im_u_img{
+				float: left;
+			}
+			.im_u_c{
+				float: left;
+				margin-left: 20px;
+				width: 150px;
+			}
+			.im_u_name{
+				height: 20px;
+				font-size: 16px;
+				line-height: 20px;
+			}
+			.im_u_text{
+				overflow: hidden;
+				height: 40px;
+			} 
+			.im_u_r{
+				float: right;
+			}
+			.im_u_time{
+				margin-right: 10px;
+				width: 120px;
+				text-align: center;
+			}
+			.im_u_unread{
+				margin: 10px auto 0px auto;
+				width: 20px;
+				height: 20px;
+				text-align: center;
+				line-height: 20px;
+				font-size: 10px;
+				background-color: red;
+				color: #fff;
+				border-radius: 50%;
+			}
+			/* 聊天样式 */
+			#im_text{
+				height: 70vh;
+				background-color: #00FF00;
+			}
+			.w-e-text-container{
+				height: 19vh !important;
+			}
+			.editor-box{
+				z-index: 9999999999999;
+			}
+			
+			.im_text_a{
+				margin-top: 20px;
+			}
+			.left{
+				float: left;
+				margin-left: 20px;
+			}
+			.right{
+				float: right;
+				margin-right: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 防止margin向下击穿 -->
+		<div style="margin-top: -1em;"><br></div>
+		<div class="vue-box" style="display: none;" :style="'display: block;'">
+			<el-container id="container">
+				<el-aside width="300" class="aside">
+					<div class="im_u" v-for="(item,index) in userList" @click="cutuser(item.id)" @contextmenu.prevent="cs">
+						<div class="im_u_img">
+							<img :src="item.img" 
+								style="width: 40px; height: 40px;margin-top: 10px; border-radius: 50%; cursor: pointer;" >
+						</div>
+						<div class="im_u_c">
+							<div class="im_u_name">
+								{{item.name}}
+							</div>
+							<div class="im_u_text" v-html="item.text">
+								<!-- {{item.text}} -->
+							</div>
+						</div>
+						<div class="im_u_r">
+							<div class="im_u_time">
+								{{sa_IM.date(item.date)}}
+							</div>
+							<div class="im_u_unread" v-if="item.unread > 0">
+								{{item.unread > 99 ? '99+':item.unread}}
+							</div>
+						</div>
+					</div>
+				</el-aside>
+				<el-main>
+					<div id="im_text">
+						<div class="im_text_a" v-for="(item,index) in textList">
+							<div :class="fId == item.sid ? 'im_text_img left':'im_text_img right'">
+								<img :src="item.img"
+									style="width: 40px; height: 40px;margin-top: 10px; border-radius: 50%; cursor: pointer;" >
+							</div>
+							<div :class="fId == item.sid ? 'im_text_text left':'im_text_text right'" v-html="item.text">
+							</div>
+							<div style="clear: both;"></div>
+						</div>
+					</div>
+					<div class="editor-box">
+						<div id="editor" @keydown.enter="keyDown"></div> 
+					</div>
+				</el-main>
+			</el-container>
+		</div>
+		<script type="text/javascript">
+			
+			
+			function create_editor(content) {
+				var E = window.wangEditor
+				window.editor = new E('#editor');
+			
+				editor.customConfig.menus = [
+					'emoticon',
+					'image',
+					'video'
+				]
+				editor.customConfig.debug = true; // debug模式
+				// editor.customConfig.uploadFileName = 'file'; // 图片流name
+				// editor.customConfig.withCredentials = true; // 跨域携带cookie
+				// editor.customConfig.uploadImgShowBase64 = true   	// 使用 base64 保存图片
+				
+				$.ajax({
+				    url: "../../static/im/em.json",//json文件位置
+				    type: "get",
+					async:false,
+				    dataType: "json", //返回数据格式为json
+				    success: function(data) {//请求成功完成后要执行的方法
+					console.log(data)
+					// editor.customConfig.emotions = data
+					 editor.customConfig.emotions = [
+					        {
+					            title: '默认',
+					            // type -> 'emoji' / 'image'
+					            type: 'image',
+					            content: data
+					        },
+							]
+				  //       editor.customConfig.emotions  = [
+						// 	{
+						// 	title: '默认',
+						// 	type: 'emoji',
+						// 	content: data
+						// 	}
+						// ];
+				    }
+				})
+				editor.create(); // 创建
+				editor.txt.html(content);	// 为编辑器赋值
+			}
+			
+		</script>
+		<script type="text/javascript">
+			var app = new Vue({
+				el: '.vue-box',
+				data: {
+					fId:0,
+					userList:[],
+					textList:[],
+					joinChat:{
+						type:"joinChat",
+						fId:0,
+						pageNo:1,
+						pageSize:10
+					},
+					readChat:{
+						type:"readChat",
+						fId:0
+					},
+					sendText:{
+						type:"sendText",
+						text:"",
+						fId:0,
+						genre:""
+					}
+				},
+				methods: {
+					// websocker
+					websocker : function(){
+						sa_IM.message().onmessage = (res) =>{
+							
+							res = JSON.parse(res.data)
+							if("chatList" == res.type){
+								this.userList = res.data;
+								this.$forceUpdate()
+							}
+							
+							if("joinChat" == res.type){
+								this.textList = res.data.reverse();
+								this.$forceUpdate()
+								
+								setTimeout(this.base(),1000)
+							}
+							
+							if("sendText" == res.type){
+								this.textList.push(res)
+								this.$forceUpdate()
+								
+								setTimeout(this.base(),1000)
+							}
+							
+							if("receiveText" == res.type&&this.fId == res.sid){
+								this.textList.push(res)
+								this.$forceUpdate()
+								setTimeout(this.base(),1000)
+								
+								sa_IM.send(this.readChat)
+							}
+							
+						}
+					},
+					// 回到底部
+					base:function(){
+						
+						var div = document.getElementById('im_text');
+						div.scrollTop = div.scrollHeight;
+					},
+					// 右击测试
+					cs :function(){
+						console.log("sc")
+					},
+					// 点击聊天
+					cutuser:function(id){
+						this.joinChat.fId = id;
+						this.fId = id;
+						this.readChat.fId = id; 
+						sa_IM.send(this.joinChat)
+					},
+					// 监听ctrl + 回车
+					keyDown:function(e){
+						if(e.ctrlKey && e.keyCode==13){
+							
+							if(this.fId == 0 ){
+								return sa.error("请先选择聊天用户")
+							}
+							
+							this.send();
+						}
+					},
+					// 发送信息
+					send:function(){
+						this.sendText.fId = this.fId;
+						this.sendText.text = editor.txt.html()
+						this.sendText.genre = "text";
+						sa_IM.send(this.sendText)
+						editor.txt.html("")
+					}
+				},
+				mounted: function(){
+					create_editor()
+					sa_IM.send({"type":"chatList"})
+					this.websocker();
+				}
+			})
+		</script>
+	</body>
+</html>
