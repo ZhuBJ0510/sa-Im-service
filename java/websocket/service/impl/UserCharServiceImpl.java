@@ -39,7 +39,9 @@ public class UserCharServiceImpl implements UserChatService {
     @Override
     public void readChat(String uid) {
         Map m = (Map) Web.redisUtil.lGetIndex("IM:SERVICE:MESSAGE:" + uid, 0);
-        m.put("unread",0);
-        Web.redisUtil.lSet("IM:SERVICE:MESSAGE:" + uid, 0 ,m);
+        if (m != null) {
+            m.put("unread", 0);
+            Web.redisUtil.lSet("IM:SERVICE:MESSAGE:" + uid, 0 ,m);
+        }
     }
 }

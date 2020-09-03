@@ -217,7 +217,7 @@ public class UserWebsocket {
 
             returnMap.clear();
             returnMap.put("type","unread");
-            returnMap.put("data",Web.userChatService.findChatRecord(uId,1,1).get(0));
+            returnMap.put("unread",Web.userChatService.findChatRecord(uId,1,1).size() > 0 ? ((Map)Web.userChatService.findChatRecord(uId,1,1).get(0)).get("unread") : 0);
             sendMessageTo(returnMap);
         }
         //↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
