@@ -73,7 +73,7 @@
 ---
 
 > # uniapp (用户端)
-> 待发布
+> [连接](https://github.com/ZhuBJ0510/sa-Im-uniapp)
 
 # 请求
 > 连接： ws://ip:端口/websocket/{uid}/{type} <br />
