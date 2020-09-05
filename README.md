@@ -68,7 +68,26 @@
 ><script src="static/im/sa_IM.js"></script>
 >```
 > 在 static/im/sa_IM.js 修改连接地址<br />
-> 在sa-code.js 调用 sa_IM.login("xxx");(<xxx> 为后台id) 来连接后台websocket
+> ### 在sa.js的window.sa_admin = xxx下面添加
+>```
+> window.sa_IM = window.sa_IM || parent.sa_IM || top.sa_IM;
+>```
+> ### 在sa-code.js 调用 
+>```
+>sa_IM.login("xxx");(<xxx> 为后台id) 
+>```
+>来连接后台websocket
+>在menu-list.js 里添加页面
+>```
+>{
+>	id: '10', // id可能根据个人需求进行修改
+>	name: '客服聊天',
+>	icon: 'el-icon-document-copy',
+>	info: '在后台与用户聊天',
+>	url:'sa-html/IM/im.html'
+>},
+>```
+> 运行index.html即可
 
 ---
 
